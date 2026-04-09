@@ -5,6 +5,7 @@ import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import TaskList from './src/components/TaskList';
 import { addTask, deleteTask, getAllTasks, updateTask, TaskItem } from './src/utils/handle-api';
+import { globalStyles } from './src/styles/global';
 
 export default function App() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -101,7 +102,7 @@ export default function App() {
 
         {loading && (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#000" />
+            <ActivityIndicator size="large" color={globalStyles.primaryColor} />
           </View>
         )}
       </View>
@@ -165,7 +166,7 @@ export default function App() {
                 <Checkbox
                   value={completed}
                   onValueChange={setCompleted}
-                  color={completed ? '#000' : undefined}
+                  color={completed ? globalStyles.primaryColor : undefined}
                 />
               </View>
             </View>
@@ -194,7 +195,7 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: globalStyles.backgroundColor,
     paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
   container: {
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   counterText: {
-    fontSize: 16,
+    fontSize: globalStyles.bodyFontSize,
     color: '#666',
   },
   actionButtonsContainer: {
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   actionButtonAdd: {
-    backgroundColor: '#000',
+    backgroundColor: globalStyles.primaryColor,
     shadowColor: '#000',
   },
   actionButtonAddPressed: {
@@ -351,7 +352,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   modalSaveBtn: {
-    backgroundColor: '#000',
+    backgroundColor: globalStyles.primaryColor,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 4,
