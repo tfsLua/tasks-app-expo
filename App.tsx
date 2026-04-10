@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, Platform, StatusBar as RNStatusBar, Image, Pressable, ActivityIndicator, Modal } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, Platform, StatusBar as RNStatusBar, Image, Pressable, ActivityIndicator, Modal, Button } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import TaskList from './src/components/TaskList';
+import AboutScreen from './src/components/AboutScreen';
 import { addTask, deleteTask, getAllTasks, updateTask, TaskItem } from './src/utils/handle-api';
 import { globalStyles } from './src/styles/global';
 
@@ -23,6 +24,8 @@ export default function App() {
 
   const [filter, setFilter] = useState<'all' | 'completed' | 'pending'>('all');
   const [priority, setPriority] = useState<'Baixa' | 'Média' | 'Alta'>('Baixa');
+
+  const [aboutVisible, setAboutVisible] = useState(false);
 
   useEffect(() => {
     getAllTasks(setTasks, setLoading);
@@ -87,6 +90,7 @@ export default function App() {
           <Text style={styles.counterText}>Total de Tarefas: {tasks.length}</Text>
         </View>
 
+        {/* FILTRO */}
         <View style={styles.filterContainer}>
           {['all', 'completed', 'pending'].map((item) => (
             <TouchableOpacity
@@ -133,6 +137,11 @@ export default function App() {
           >
             <Text style={styles.actionButtonText}>Excluir todas</Text>
           </Pressable>
+        </View>
+
+        {/* BOTÃO SOBRE */}
+        <View style={{ marginTop: 10 }}>
+          <Button title="Sobre o App" onPress={() => setAboutVisible(true)} />
         </View>
 
         <TaskList 
@@ -192,7 +201,7 @@ export default function App() {
             <View style={styles.fieldRow}>
               <Text style={styles.fieldLabel}>Data limite:</Text>
               {Platform.OS === 'web' ? (
-                // @ts-ignore
+
                 <input 
                   type="date"
                   value={dueDate ? dueDate.toISOString().split('T')[0] : ''}
@@ -251,177 +260,15 @@ export default function App() {
         </View>
       </Modal>
 
+      <Modal
+        visible={aboutVisible}
+        animationType="slide"
+        onRequestClose={() => setAboutVisible(false)}
+      >
+        <AboutScreen onClose={() => setAboutVisible(false)} />
+      </Modal>
+
       <StatusBar style="auto" />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: globalStyles.backgroundColor,
-    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
-  },
-  container: {
-    flex: 1,
-    maxWidth: 600,
-    width: '100%',
-    alignSelf: 'center',
-    paddingHorizontal: 16,
-  },
-  headerContainer: {
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  logo: {
-    width: 60,
-    height: 60,
-    marginBottom: 8,
-  },
-  header: {
-    textAlign: 'center',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  counterContainer: {
-    marginTop: 8,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  counterText: {
-    fontSize: globalStyles.bodyFontSize,
-    color: '#666',
-  },
-
-  filterContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 10,
-    marginTop: 12,
-  },
-  filterButton: {
-    borderWidth: 1,
-    borderColor: '#000',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-  },
-  filterButtonActive: {
-    backgroundColor: '#000',
-  },
-  filterText: {
-    color: '#000',
-  },
-  filterTextActive: {
-    color: '#fff',
-  },
-
-  priorityButton: {
-    borderWidth: 1,
-    borderColor: '#000',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-  },
-  priorityButtonActive: {
-    backgroundColor: '#000',
-  },
-
-  actionButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    marginTop: 16,
-  },
-  actionButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    flex: 1,
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  actionButtonAdd: {
-    backgroundColor: globalStyles.primaryColor,
-  },
-  deleteButton: {
-    backgroundColor: '#ff4d4d',
-  },
-
-  loaderContainer: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.7)',
-  },
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '90%',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 24,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  modalInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 16,
-  },
-
-  fieldRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  fieldLabel: {
-    fontWeight: 'bold',
-  },
-  checkboxContainer: {
-    marginLeft: 16,
-  },
-
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-  },
-  modalSaveBtn: {
-    backgroundColor: globalStyles.primaryColor,
-    padding: 10,
-  },
-  modalCancelBtn: {
-    padding: 10,
-  },
-  modalSaveText: {
-    color: '#fff',
-  },
-  modalCancelText: {
-    color: '#666',
-  },
-});
