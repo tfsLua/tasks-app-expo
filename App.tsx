@@ -19,8 +19,10 @@ export default function App() {
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // 🔥 NOVO STATE (fallback da imagem)
   const [logoError, setLogoError] = useState(false);
+
+  const [filter, setFilter] = useState<'all' | 'completed' | 'pending'>('all');
+  const [priority, setPriority] = useState<'Baixa' | 'Média' | 'Alta'>('Baixa');
 
   useEffect(() => {
     getAllTasks(setTasks, setLoading);
@@ -58,6 +60,12 @@ export default function App() {
     if (selectedDate) setDueDate(selectedDate);
   };
 
+  const filteredTasks = tasks.filter(task => {
+    if (filter === 'completed') return task.completed;
+    if (filter === 'pending') return !task.completed;
+    return true;
+  });
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -72,12 +80,35 @@ export default function App() {
           ) : (
             <Text style={styles.header}>Gerenciador de Tarefas</Text>
           )}
-
           <Text style={styles.header}>Tarefas</Text>
         </View>
 
         <View style={styles.counterContainer}>
           <Text style={styles.counterText}>Total de Tarefas: {tasks.length}</Text>
+        </View>
+
+        <View style={styles.filterContainer}>
+          {['all', 'completed', 'pending'].map((item) => (
+            <TouchableOpacity
+              key={item}
+              onPress={() => setFilter(item as any)}
+              style={[
+                styles.filterButton,
+                filter === item && styles.filterButtonActive
+              ]}
+            >
+              <Text
+                style={[
+                  styles.filterText,
+                  filter === item && styles.filterTextActive
+                ]}
+              >
+                {item === 'all' && 'Todas'}
+                {item === 'completed' && 'Concluídas'}
+                {item === 'pending' && 'Pendentes'}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         <View style={styles.actionButtonsContainer}>
@@ -105,7 +136,7 @@ export default function App() {
         </View>
 
         <TaskList 
-          tasks={tasks} 
+          tasks={filteredTasks}
           onUpdate={updateMode} 
           onDelete={(id) => deleteTask(id, setTasks)} 
         />
@@ -135,6 +166,29 @@ export default function App() {
               onChangeText={setText}
             />
 
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>
+                Prioridade:
+              </Text>
+
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                {['Baixa', 'Média', 'Alta'].map((p) => (
+                  <TouchableOpacity
+                    key={p}
+                    onPress={() => setPriority(p as any)}
+                    style={[
+                      styles.priorityButton,
+                      priority === p && styles.priorityButtonActive
+                    ]}
+                  >
+                    <Text style={{ color: priority === p ? '#fff' : '#000' }}>
+                      {p}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
             <View style={styles.fieldRow}>
               <Text style={styles.fieldLabel}>Data limite:</Text>
               {Platform.OS === 'web' ? (
@@ -154,7 +208,7 @@ export default function App() {
                   style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc', flex: 1, marginLeft: 16 }}
                 />
               ) : (
-                <View style={{ flex: 1, marginLeft: 16, alignItems: 'flex-start' }}>
+                <View style={{ flex: 1, marginLeft: 16 }}>
                   <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.datePickerBtn}>
                     <Text>{dueDate ? dueDate.toLocaleDateString() : "Selecionar Data"}</Text>
                   </TouchableOpacity>
@@ -239,6 +293,41 @@ const styles = StyleSheet.create({
     fontSize: globalStyles.bodyFontSize,
     color: '#666',
   },
+
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 12,
+  },
+  filterButton: {
+    borderWidth: 1,
+    borderColor: '#000',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  filterButtonActive: {
+    backgroundColor: '#000',
+  },
+  filterText: {
+    color: '#000',
+  },
+  filterTextActive: {
+    color: '#fff',
+  },
+
+  priorityButton: {
+    borderWidth: 1,
+    borderColor: '#000',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  priorityButtonActive: {
+    backgroundColor: '#000',
+  },
+
   actionButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -261,28 +350,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 14,
-    letterSpacing: 0.5,
   },
   actionButtonAdd: {
     backgroundColor: globalStyles.primaryColor,
-    shadowColor: '#000',
-  },
-  actionButtonAddPressed: {
-    backgroundColor: '#333',
-    transform: [{ scale: 0.98 }],
-    elevation: 1,
-    shadowOpacity: 0.1,
   },
   deleteButton: {
     backgroundColor: '#ff4d4d',
-    shadowColor: '#ff0000',
   },
-  deleteButtonPressed: {
-    backgroundColor: '#d9363e',
-    transform: [{ scale: 0.98 }],
-    elevation: 1,
-    shadowOpacity: 0.1,
-  },
+
   loaderContainer: {
     position: 'absolute',
     top: 0,
@@ -291,9 +366,9 @@ const styles = StyleSheet.create({
     right: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.7)',
   },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -302,15 +377,9 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: '90%',
-    maxWidth: 400,
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 24,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
   },
   modalTitle: {
     fontSize: 20,
@@ -321,58 +390,38 @@ const styles = StyleSheet.create({
   modalInput: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 4,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    fontSize: 16,
+    padding: 10,
     marginBottom: 16,
   },
+
   fieldRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
   },
   fieldLabel: {
-    fontSize: 16,
     fontWeight: 'bold',
   },
   checkboxContainer: {
     marginLeft: 16,
   },
-  datePickerBtn: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-  },
+
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 12,
-    marginTop: 8,
-  },
-  modalCancelBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-  },
-  modalCancelText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   modalSaveBtn: {
     backgroundColor: globalStyles.primaryColor,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 4,
+    padding: 10,
   },
-  modalSaveBtnDisabled: {
-    backgroundColor: '#ccc',
+  modalCancelBtn: {
+    padding: 10,
   },
   modalSaveText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+  },
+  modalCancelText: {
+    color: '#666',
   },
 });
