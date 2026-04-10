@@ -10,22 +10,36 @@ interface TaskItemProps {
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({ task, updateMode, deleteTask }) => {
+
+  const isExpired = task.dueDate
+    ? new Date(task.dueDate) < new Date()
+    : false;
+
   return (
     <View style={styles.task}>
       <View style={styles.contentContainer}>
         <Text style={[styles.text, !!task.completed && styles.textCompleted]}>
           {task.text}
         </Text>
+
         {task.dueDate && (
-          <Text style={styles.dateText}>
+          <Text
+            style={[
+              styles.dateText,
+              { color: isExpired ? '#e53935' : '#43a047' }
+            ]}
+          >
             Até: {new Date(task.dueDate).toLocaleDateString()}
           </Text>
         )}
+
       </View>
+
       <View style={styles.icons}>
         <TouchableOpacity onPress={updateMode} accessibilityRole="button">
           <Feather name="edit" size={20} color="#fff" style={styles.icon} />
         </TouchableOpacity>
+
         <TouchableOpacity onPress={deleteTask} accessibilityRole="button">
           <AntDesign name="delete" size={20} color="#fff" style={styles.icon} />
         </TouchableOpacity>
@@ -58,7 +72,6 @@ const styles = StyleSheet.create({
     color: '#aaa',
   },
   dateText: {
-    color: '#bbb',
     fontSize: 12,
     marginTop: 4,
   },

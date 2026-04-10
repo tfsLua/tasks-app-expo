@@ -19,6 +19,9 @@ export default function App() {
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  // 🔥 NOVO STATE (fallback da imagem)
+  const [logoError, setLogoError] = useState(false);
+
   useEffect(() => {
     getAllTasks(setTasks, setLoading);
   }, []);
@@ -58,11 +61,18 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+
         <View style={styles.headerContainer}>
-          <Image 
-            source={require('./assets/task-app-banner.png')} 
-            style={styles.logo} 
-          />
+          {!logoError ? (
+            <Image 
+              source={require('./assets/task-app-banner.png')} 
+              style={styles.logo}
+              onError={() => setLogoError(true)}
+            />
+          ) : (
+            <Text style={styles.header}>Gerenciador de Tarefas</Text>
+          )}
+
           <Text style={styles.header}>Tarefas</Text>
         </View>
 
